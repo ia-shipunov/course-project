@@ -1,6 +1,7 @@
 CC = gcc
 CFLAGS = -std=c99 -Wall -O2 -lm
 IDIR = include
+LDIR = libs
 
 LIB_SRC = src/image.c src/filters.c
 LIB_OBJ = $(LIB_SRC:.c=.o)

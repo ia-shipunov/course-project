@@ -11,6 +11,11 @@ static Image *make_image(int w, int h, uint8_t fill) {
     return img;
 }
 
+static int image_equals(const Image *a, const Image *b) {
+    if (a->width != b->width || a->height != b->height) return 0;
+    return memcmp(a->data, b->data, a->width * a->height) == 0;
+}
+
 void test_median_filter() {
     Image *src = make_image(5, 5, 0);
     src->data[2 * 5 + 2] = 255;
@@ -22,7 +27,6 @@ void test_median_filter() {
     image_free(res);
     printf("  [PASS] median_filter\n");
 }
-
 void test_gaussian_filter() {
     Image *src = make_image(10, 10, 100);
     Image *res = image_gaussian_filter(src, 5, 1.0);
