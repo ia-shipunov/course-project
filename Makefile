@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -std=c99 -Wall -O2 -lm
+CFLAGS = -std=c99 -Wall -O2
+LDFLAGS = -lm
 IDIR = include
 
 LIB_SRC = src/image.c src/filters.c
@@ -11,13 +12,13 @@ TEST_OBJ = $(TEST_SRC:.c=.o)
 all: imgproc
 
 imgproc: src/main.c $(LIB_OBJ)
-	$(CC) $(CFLAGS) -I$(IDIR) -o $@ $^
+	$(CC) $(CFLAGS) -I$(IDIR) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -I$(IDIR) -c $< -o $@
 
 test: $(TEST_OBJ) $(LIB_OBJ)
-	$(CC) $(CFLAGS) -I$(IDIR) -o test_runner $^
+	$(CC) $(CFLAGS) -I$(IDIR) -o test_runner $^ $(LDFLAGS)
 	./test_runner
 
 clean:

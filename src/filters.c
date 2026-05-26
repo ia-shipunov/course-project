@@ -80,3 +80,51 @@ Image *image_histogram_equalize(const Image *src) {
         dst->data[i] = map[src->data[i]];
     return dst;
 }
+
+Image *image_convolve(const Image *src, const float *kernel, int kernel_size) {
+    Image *dst = image_create(src->width, src->height, src->channels);
+    int half = kernel_size / 2;
+    
+    for (int y = 0; y < src->height; y++) {
+        for (int x = 0; x < src->width; x++) {
+            double sum = 0.0;
+            for (int dy = -half; dy <= half; dy++) {
+                for (int dx = -half; dx <= half; dx++) {
+                    int ny = y + dy;
+                    int nx = x + dx;
+                    if (ny >= 0 && ny < src->height && nx >= 0 && nx < src->width) {
+                        sum += src->data[ny * src->width + nx] * kernel[(dy + half) * kernel_size + (dx + half)];
+                    }
+                }
+            }
+            int val = (int)(sum + 0.5);
+            if (val < 0) val = 0;
+            if (val > 255) val = 255;
+            dst->data[y * dst->width + x] = (uint8_t)val;
+        }
+    }
+    return dst;
+}
+
+Image *image_sobel_edge(const Image *src, uint8_t threshold) {
+    // Sobel kernels for X and Y directions
+    float sobel_x[9] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+    float sobel_y[9] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
+    
+    Image *gx = image_convolve(src, sobel_x, 3);
+    Image *gy = image_convolve(src, sobel_y, 3);
+    
+    Image *dst = image_create(src->width, src->height, src->channels);
+    
+    for (int i = 0; i < src->width * src->height; i++) {
+        int mag = (int)sqrt((double)gx->data[i] * gx->data[i] + (double)gy->data[i] * gy->data[i]);
+        if (mag > 255) mag = 255;
+        if (mag < threshold) mag = 0;
+        else mag = 255;
+        dst->data[i] = (uint8_t)mag;
+    }
+    
+    image_free(gx);
+    image_free(gy);
+    return dst;
+}
